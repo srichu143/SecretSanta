@@ -178,16 +178,16 @@ export default function WishlistPage() {
                                                 <span className="font-bold text-gray-900">{item.name}:</span>
                                                 <span className="text-gray-900 text-lg">{item.item}</span>
                                             </div>
-                                            <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-0">
                                                 <button
                                                     onClick={() => startEditing(item)}
-                                                    className="text-indigo-600 hover:text-indigo-900 font-medium text-sm"
+                                                    className="flex flex-col sflex-1 sm:flex-none bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-900 font-medium text-sm px-4 py-2 rounded-md border border-indigo-300 min-h-[44px] flex items-center justify-centerm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-0"
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => deleteItem(item.id)}
-                                                    className="text-red-600 hover:text-red-900 font-medium text-sm"
+                                                    className="flex flex-col sflex-1 sm:flex-none bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900 font-medium text-sm px-4 py-2 rounded-md border border-red-300 min-h-[44px] flex items-center justify-centerflex-1 sm:flex-none bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-900 font-medium text-sm px-4 py-2 rounded-md border border-indigo-300 min-h-[44px] flex items-center justify-centerm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-0"
                                                 >
                                                     Delete
                                                 </button>
