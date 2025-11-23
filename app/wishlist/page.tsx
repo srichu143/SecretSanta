@@ -105,7 +105,7 @@ export default function WishlistPage() {
                 </h1>
 
                 <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
-                    <div className="flex gap-4">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <input
                             type="text"
                             value={newName}
@@ -123,7 +123,7 @@ export default function WishlistPage() {
                         />
                         <button
                             onClick={addItem}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 min-h-[44px] border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                             Add
                         </button>
@@ -135,7 +135,7 @@ export default function WishlistPage() {
                         {loading ? (
                             <li className="p-6 text-center text-gray-500">Loading...</li>
                         ) : items.length === 0 ? (
-                            <li className="p-6 text-center text-gray-500">No items yet. Add one above!</li>
+                            <li className=py-12 px-6 text-center text-gray-400 text-lg">No items yet. Add one above!</li>
                         ) : (
                             items.map((item) => (
                                 <li key={item.id} className="p-4 hover:bg-gray-50 flex items-center justify-between group">
