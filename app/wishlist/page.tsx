@@ -4,202 +4,190 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface WishlistItem {
-    id: string;
-    item: string;
-    name: string | null;
-    created_at: string;
+  id: string;
+  item: string;
+  name: string | null;
+  created_at: string;
 }
 
 export default function WishlistPage() {
-    const [items, setItems] = useState<WishlistItem[]>([]);
-    const [newItem, setNewItem] = useState('');
-    const [newName, setNewName] = useState('');
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [editText, setEditText] = useState('');
-    const [editName, setEditName] = useState('');
-    const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [newItem, setNewItem] = useState('');
+  const [newName, setNewName] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+  const [editName, setEditName] = useState('');
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchItems();
-    }, []);
+  useEffect(() => {
+    fetchItems();
+  }, []);
 
-    const fetchItems = async () => {
-        setLoading(true);
-        const { data, error } = await supabase
-            .from('wishlist')
-            .select('*')
-            .order('created_at', { ascending: false });
+  const fetchItems = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('wishlist')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching items:', error);
-        } else {
-            setItems(data || []);
-        }
-        setLoading(false);
-    };
+    if (!error) setItems(data || []);
+    setLoading(false);
+  };
 
-    const addItem = async () => {
-        if (!newItem.trim() || !newName.trim()) return;
+  const addItem = async () => {
+    if (!newItem.trim() || !newName.trim()) return;
 
-        const { error } = await supabase
-            .from('wishlist')
-            .insert([{ item: newItem.trim(), name: newName.trim() }]);
+    await supabase.from('wishlist').insert([
+      { item: newItem.trim(), name: newName.trim() }
+    ]);
 
-        if (error) {
-            console.error('Error adding item:', error);
-        } else {
-            setNewItem('');
-            setNewName('');
-            fetchItems();
-        }
-    };
+    setNewItem('');
+    setNewName('');
+    fetchItems();
+  };
 
-    const deleteItem = async (id: string) => {
-        const { error } = await supabase
-            .from('wishlist')
-            .delete()
-            .eq('id', id);
+  const deleteItem = async (id: string) => {
+    await supabase.from('wishlist').delete().eq('id', id);
+    fetchItems();
+  };
 
-        if (error) {
-            console.error('Error deleting item:', error);
-        } else {
-            fetchItems();
-        }
-    };
+  const startEditing = (item: WishlistItem) => {
+    setEditingId(item.id);
+    setEditText(item.item);
+    setEditName(item.name || '');
+  };
 
-    const startEditing = (item: WishlistItem) => {
-        setEditingId(item.id);
-        setEditText(item.item);
-        setEditName(item.name || '');
-    };
+  const saveEdit = async () => {
+    if (!editText.trim() || !editName.trim() || !editingId) return;
 
-    const saveEdit = async () => {
-        if (!editText.trim() || !editName.trim() || !editingId) return;
+    await supabase
+      .from('wishlist')
+      .update({ item: editText.trim(), name: editName.trim() })
+      .eq('id', editingId);
 
-        const { error } = await supabase
-            .from('wishlist')
-            .update({ item: editText.trim(), name: editName.trim() })
-            .eq('id', editingId);
+    setEditingId(null);
+    setEditText('');
+    setEditName('');
+    fetchItems();
+  };
 
-        if (error) {
-            console.error('Error updating item:', error);
-        } else {
-            setEditingId(null);
-            setEditText('');
-            setEditName('');
-            fetchItems();
-        }
-    };
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText('');
+    setEditName('');
+  };
 
-    const cancelEdit = () => {
-        setEditingId(null);
-        setEditText('');
-        setEditName('');
-    };
+  return (
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="max-w-3xl mx-auto">
 
-    return (
-        <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
-                    ECCO Team WishList
-                </h1>
+        <h1 className="text-3xl font-bold text-center mb-6">
+          ECCO Team Wishlist
+        </h1>
 
-                <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <input
-                            type="text"
-                            value={newName}
-                            onChange={(e) => setNewName(e.target.value)}
-                            placeholder="Your Name"
-                            className="w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                        />
-                        <input
-                            type="text"
-                            value={newItem}
-                            onChange={(e) => setNewItem(e.target.value)}
-                            placeholder="I wish for..."
-                            className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
-                            onKeyDown={(e) => e.key === 'Enter' && addItem()}
-                        />
-                        <button
-                            onClick={addItem}
-                            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 min-h-[44px] border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            Add
-                        </button>
-                    </div>
-                </div>
+        {/* NEW ITEM FORM */}
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Your Name"
+              className="w-full sm:w-1/3 border rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
 
-                <div className="bg-white shadow sm:rounded-lg overflow-hidden">
-                    <ul className="divide-y divide-gray-200">
-                        {loading ? (
-                            <li className="p-6 text-center text-gray-500">Loading...</li>
-                        ) : items.length === 0 ? (
-                            <li className=py-12 px-6 text-center text-gray-400 text-lg">No items yet. Add one above!</li>
-                        ) : (
-                            items.map((item) => (
-                                <li key={item.id} className="p-4 hover:bg-gray-50 flex items-center justify-between group">
-                                    {editingId === item.id ? (
-                                        <div className="flex-1 flex gap-2 items-center">
-                                            <input
-                                                type="text"
-                                                value={editName}
-                                                onChange={(e) => setEditName(e.target.value)}
-                                                className="w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-1 border"
-                                                placeholder="Name"
-                                            />
-                                            <input
-                                                type="text"
-                                                value={editText}
-                                                onChange={(e) => setEditText(e.target.value)}
-                                                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-1 border"
-                                                autoFocus
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') saveEdit();
-                                                    if (e.key === 'Escape') cancelEdit();
-                                                }}
-                                            />
-                                            <button
-                                                onClick={saveEdit}
-                                                className="text-green-600 hover:text-green-800 font-medium text-sm"
-                                            >
-                                                Save
-                                            </button>
-                                            <button
-                                                onClick={cancelEdit}
-                                                className="text-gray-500 hover:text-gray-700 font-medium text-sm"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="flex-1 flex items-center gap-2">
-                                                <span className="font-bold text-gray-900">{item.name}:</span>
-                                                <span className="text-gray-900 text-lg">{item.item}</span>
-                                            </div>
-                                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-0">
-                                                <button
-                                                    onClick={() => startEditing(item)}
-                                                    className="flex flex-col sflex-1 sm:flex-none bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-900 font-medium text-sm px-4 py-2 rounded-md border border-indigo-300 min-h-[44px] flex items-center justify-centerm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-0"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => deleteItem(item.id)}
-                                                    className="flex flex-col sflex-1 sm:flex-none bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-900 font-medium text-sm px-4 py-2 rounded-md border border-red-300 min-h-[44px] flex items-center justify-centerflex-1 sm:flex-none bg-indigo-100 text-indigo-700 hover:bg-indigo-200 hover:text-indigo-900 font-medium text-sm px-4 py-2 rounded-md border border-indigo-300 min-h-[44px] flex items-center justify-centerm:flex-row gap-2 sm:gap-3 mt-2 sm:mt-0"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </li>
-                            ))
-                        )}
-                    </ul>
-                </div>
-            </div>
+            <input
+              type="text"
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              placeholder="I wish for..."
+              className="flex-1 border rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              onKeyDown={(e) => e.key === 'Enter' && addItem()}
+            />
+
+            <button
+              onClick={addItem}
+              className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 shadow"
+            >
+              Add
+            </button>
+          </div>
         </div>
-    );
+
+        {/* LIST */}
+        <div className="bg-white shadow rounded-lg">
+          {loading ? (
+            <p className="p-6 text-center text-gray-500">Loading...</p>
+          ) : items.length === 0 ? (
+            <p className="p-12 text-center text-gray-400 text-lg">
+              No items yet. Add one above!
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-200">
+              {items.map((item) => (
+                <li
+                  key={item.id}
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50"
+                >
+                  {editingId === item.id ? (
+                    <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full sm:w-1/3 border rounded-md p-1"
+                      />
+
+                      <input
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="flex-1 border rounded-md p-1"
+                        autoFocus
+                      />
+
+                      <button
+                        onClick={saveEdit}
+                        className="text-green-600 hover:underline text-sm"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="text-gray-600 hover:underline text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex-1">
+                        <span className="font-bold">{item.name}: </span>
+                        <span>{item.item}</span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => startEditing(item)}
+                          className="text-indigo-600 hover:underline text-sm"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() => deleteItem(item.id)}
+                          className="text-red-600 hover:underline text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
