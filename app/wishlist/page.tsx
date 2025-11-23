@@ -100,8 +100,8 @@ export default function WishlistPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                    Shared Public Wishlist
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">
+                    ECCO Team WishList
                 </h1>
 
                 <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
